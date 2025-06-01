@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MojeKartyTheme {
                 Surface {
-                    MainScreen()
+                    MainScreen(context = this)
                 }
             }
         }

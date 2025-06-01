@@ -13,7 +13,11 @@ import com.example.mojekarty.model.Card
 import androidx.core.graphics.toColorInt
 
 @Composable
-fun LoyaltyCardItem(card: Card, onClick: () -> Unit) {
+fun LoyaltyCardItem(
+    card: Card,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     val backgroundColor = try {
         Color(card.color.toColorInt())
     } catch (e: Exception) {
@@ -21,16 +25,15 @@ fun LoyaltyCardItem(card: Card, onClick: () -> Unit) {
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() },
+            .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween

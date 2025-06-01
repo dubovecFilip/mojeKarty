@@ -40,7 +40,7 @@ fun AddCardScreen(
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    // TODO: Skenovanie kódu
+                    // TODO: skenovanie kódu
                 }) {
                     Icon(Icons.Default.Search, contentDescription = "Skenovať")
                 }
@@ -54,7 +54,6 @@ fun AddCardScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Výber farby nateraz cez TextField
         OutlinedTextField(
             value = color,
             onValueChange = { color = it },
@@ -78,7 +77,7 @@ fun AddCardScreen(
             Button(
                 onClick = {
                     val newCard = Card(
-                        id = (0..999999).random(), // dočasné ID
+                        id = (0..999999).random(),
                         companyName = company,
                         cardNumber = number,
                         holderName = holder.ifBlank { null },
