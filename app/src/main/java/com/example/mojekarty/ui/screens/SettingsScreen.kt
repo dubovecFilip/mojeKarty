@@ -77,7 +77,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Divider(
+            HorizontalDivider(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                 thickness = 1.dp
             )
@@ -95,6 +95,18 @@ fun SettingsScreen(
             OutlinedButton(onClick = import, modifier = Modifier.weight(1f)) {
                 Text("Import")
             }
+        }
+
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+            thickness = 1.dp
+        )
+
+        Button(
+            onClick = { navController.navigate("stats") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Zobraziť štatistiky")
         }
 
         Spacer(modifier = Modifier.weight(1f))

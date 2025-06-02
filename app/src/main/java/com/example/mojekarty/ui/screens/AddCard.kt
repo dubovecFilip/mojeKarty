@@ -15,6 +15,7 @@ import com.github.skydoves.colorpicker.compose.*
 import androidx.core.graphics.toColorInt
 import com.example.mojekarty.ui.components.LoyaltyCardItem
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCardScreen(
     onSave: (Card) -> Unit,
@@ -117,7 +118,9 @@ fun AddCardScreen(
                         companyName = company,
                         cardNumber = number,
                         holderName = holder.ifBlank { null },
-                        color = hexColor
+                        color = hexColor,
+                        usedCount = initialCard?.usedCount ?: 0,
+                        createdAt = initialCard?.createdAt ?: System.currentTimeMillis()
                     )
                     onSave(newCard)
                 },

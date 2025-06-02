@@ -6,5 +6,6 @@ data class Card(
     val cardNumber: String,
     val holderName: String? = null,
     val color: String,
-    val usedCount: Int = 0
+    val usedCount: Int = 0,
+    val createdAt: Long = System.currentTimeMillis()
 )

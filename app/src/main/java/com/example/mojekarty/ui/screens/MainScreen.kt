@@ -70,6 +70,7 @@ fun MainScreen(
                                 "settings" -> "Nastavenia"
                                 "add" -> "Pridať kartu"
                                 "edit" -> "Upraviť kartu"
+                                "stats" -> "Štatistiky kariet"
                                 else -> "mojeKarty"
                             }
                         )
@@ -240,6 +241,10 @@ fun MainScreen(
                     }
                     PreviewCardScreen(card = cards[index], onBack = { navController.popBackStack() })
                 }
+            }
+
+            composable("stats") {
+                StatsScreen(cards = cards, clickCounts = cards.associate { it.id to it.usedCount })
             }
 
         }
