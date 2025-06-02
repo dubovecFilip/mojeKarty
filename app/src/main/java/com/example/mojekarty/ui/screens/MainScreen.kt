@@ -24,17 +24,20 @@ import com.example.mojekarty.model.Card
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    context: Context,
-    onAddClick: () -> Unit = {}
+    context: Context
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
+
     var selectedCard by remember { mutableStateOf<Card?>(null) }
+
     var autoSaveEnabled by remember {
         mutableStateOf(StorageManager.loadAutoSaveEnabled(context))
     }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    var editingCard by remember { mutableStateOf<Card?>(null) }
 
     val cards = remember {
         mutableStateListOf<Card>().apply {
@@ -54,6 +57,9 @@ fun MainScreen(
                         }
                     )
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 actions = {
                     if (currentDestination == "cards") {
                         IconButton(onClick = { navController.navigate("add") }) {
@@ -64,18 +70,30 @@ fun MainScreen(
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar (
+                containerColor = MaterialTheme.colorScheme.surface
+            ){
                 NavigationBarItem(
                     selected = currentDestination == "cards",
                     onClick = { navController.navigate("cards") },
                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Karty") },
-                    label = { Text("Karty") }
+                    label = { Text("Karty") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    )
                 )
                 NavigationBarItem(
                     selected = currentDestination == "settings",
                     onClick = { navController.navigate("settings") },
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Nastavenia") },
-                    label = { Text("Nastavenia") }
+                    label = { Text("Nastavenia") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    )
                 )
             }
         }
@@ -87,8 +105,9 @@ fun MainScreen(
                 text = { Text("Čo chceš spraviť s kartou ${card.companyName}?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        // TODO: pridať upravovanie
+                        editingCard = selectedCard
                         selectedCard = null
+                        navController.navigate("edit")
                     }) {
                         Text("Upraviť")
                     }
@@ -114,7 +133,9 @@ fun MainScreen(
             composable("cards") {
                 CardListScreen(
                     cards = cards,
-                    onCardClick = { /* otvor detail */ },
+                    onCardClick = {
+                        navController.navigate("preview/${it.id}")
+                    },
                     onCardLongClick = { selectedCard = it }
                 )
             }
@@ -132,7 +153,14 @@ fun MainScreen(
                     },
                     onClearAll = { cards.clear() },
                     navController = navController,
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    onImport = { importedCards ->
+                        cards.clear()
+                        cards.addAll(importedCards)
+                        if (autoSaveEnabled) {
+                            StorageManager.saveCards(context, cards)
+                        }
+                    }
                 )
             }
             composable("add") {
@@ -148,6 +176,29 @@ fun MainScreen(
                         navController.popBackStack()
                     }
                 )
+            }
+            composable("edit") {
+                AddCardScreen(
+                    initialCard = editingCard,
+                    onSave = { updatedCard ->
+                        val index = cards.indexOfFirst { it.id == updatedCard.id }
+                        if (index != -1) cards[index] = updatedCard
+                        if (autoSaveEnabled) StorageManager.saveCards(context, cards)
+                        editingCard = null
+                        navController.popBackStack()
+                    },
+                    onCancel = {
+                        editingCard = null
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable("preview/{cardId}") { backStackEntry ->
+                val cardId = backStackEntry.arguments?.getString("cardId")?.toIntOrNull()
+                val card = cards.find { it.id == cardId }
+                if (card != null) {
+                    PreviewCardScreen(card = card, onBack = { navController.popBackStack() })
+                }
             }
         }
     }

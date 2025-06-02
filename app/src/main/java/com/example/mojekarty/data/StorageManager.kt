@@ -5,6 +5,7 @@ import com.example.mojekarty.model.Card
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.core.content.edit
+import java.io.File
 
 object StorageManager {
 
@@ -35,5 +36,19 @@ object StorageManager {
     fun loadAutoSaveEnabled(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getBoolean(KEY_AUTO_SAVE, true)
+    }
+
+    fun exportCardsToFile(context: Context, cards: List<Card>): File {
+        val file = File(context.filesDir, "cards_backup.json")
+        file.writeText(gson.toJson(cards))
+        return file
+    }
+
+    fun importCardsFromFile(context: Context): List<Card> {
+        val file = File(context.filesDir, "cards_backup.json")
+        if (!file.exists()) return emptyList()
+        val json = file.readText()
+        val type = object : TypeToken<List<Card>>() {}.type
+        return gson.fromJson(json, type)
     }
 }

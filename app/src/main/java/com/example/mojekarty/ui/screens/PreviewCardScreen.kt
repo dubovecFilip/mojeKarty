@@ -1,9 +1,11 @@
-package com.example.mojekarty.ui.components
+package com.example.mojekarty.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,39 +16,31 @@ import androidx.core.graphics.toColorInt
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun LoyaltyCardItem(
+fun PreviewCardScreen(
     card: Card,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onBack: () -> Unit
 ) {
-    val backgroundColor = try {
-        Color(card.color.toColorInt())
-    } catch (e: Exception) {
-        MaterialTheme.colorScheme.primary
-    }
-
-    val cardModifier = modifier
-        .fillMaxWidth()
-        .height(120.dp)
-        .clip(RoundedCornerShape(16.dp))
-
-    Card(
-        modifier = cardModifier,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { onBack() }
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .align(Alignment.Center)
+                .padding(32.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(card.color.toColorInt()))
+                .padding(24.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = card.companyName,
+                    text =card.companyName,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
@@ -57,16 +51,18 @@ fun LoyaltyCardItem(
                 )
             }
 
+            Spacer(modifier = Modifier.height(24.dp))
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f)),
+                    .height(120.dp)
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "TODO: čiarový kód",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }

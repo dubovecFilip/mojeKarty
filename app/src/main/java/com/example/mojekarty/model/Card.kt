@@ -5,7 +5,5 @@ data class Card(
     val companyName: String,
     val cardNumber: String,
     val holderName: String? = null,
-    val color: String = "#2196F3",
-    val saved: Double = 0.0,
-    val points: Int = 0
+    val color: String
 )

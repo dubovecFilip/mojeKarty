@@ -6,18 +6,33 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
+import com.github.skydoves.colorpicker.compose.*
+import androidx.core.graphics.toColorInt
+import com.example.mojekarty.ui.components.LoyaltyCardItem
 
 @Composable
 fun AddCardScreen(
     onSave: (Card) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    initialCard: Card? = null
 ) {
-    var company by remember { mutableStateOf("") }
-    var number by remember { mutableStateOf("") }
-    var holder by remember { mutableStateOf("") }
-    var color by remember { mutableStateOf("#2196F3") }
+    var company by remember { mutableStateOf(initialCard?.companyName ?: "") }
+    var number by remember { mutableStateOf(initialCard?.cardNumber ?: "") }
+    var holder by remember { mutableStateOf(initialCard?.holderName ?: "") }
+
+    val colorController = rememberColorPickerController()
+    var selectedColor by remember {
+        mutableStateOf(
+            initialCard?.color?.let { Color(it.toColorInt()) }
+                ?: Color(0xFF2196F3)
+        )
+    }
+    var lastValidColor by remember { mutableStateOf(selectedColor) }
 
     Column(
         modifier = Modifier
@@ -54,12 +69,33 @@ fun AddCardScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = color,
-            onValueChange = { color = it },
-            label = { Text("Farba (hex)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+        Text("Vyber farbu", style = MaterialTheme.typography.labelLarge)
+
+        HsvColorPicker(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            controller = colorController,
+            onColorChanged = { colorEnvelope ->
+                val color = colorEnvelope.color
+                if (color.luminance() < 0.80f) {
+                    selectedColor = color
+                    lastValidColor = color
+                } else {
+                    selectedColor = lastValidColor
+                }
+            }
+        )
+
+        val hexColor = "#" + Integer.toHexString(selectedColor.toArgb()).takeLast(6)
+        LoyaltyCardItem(
+            card = Card(
+                id = 0,
+                companyName = if (company.isNotBlank()) company else "Spoločnosť",
+                cardNumber = if (number.isNotBlank()) number else "1234567890",
+                holderName = holder,
+                color = hexColor
+            )
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -77,11 +113,11 @@ fun AddCardScreen(
             Button(
                 onClick = {
                     val newCard = Card(
-                        id = (0..999999).random(),
+                        id = initialCard?.id ?: (0..999999).random(),
                         companyName = company,
                         cardNumber = number,
                         holderName = holder.ifBlank { null },
-                        color = color
+                        color = hexColor
                     )
                     onSave(newCard)
                 },

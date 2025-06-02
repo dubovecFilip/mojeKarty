@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import com.example.mojekarty.data.StorageManager
 import com.example.mojekarty.model.Card
 import kotlinx.coroutines.launch
+import com.example.mojekarty.util.rememberExportImportHandlers
 
 @Composable
 fun SettingsScreen(
@@ -21,8 +22,10 @@ fun SettingsScreen(
     onClearAll: () -> Unit,
     navController: NavController,
     snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onImport: (List<Card>) -> Unit,
 ) {
+    val (export, import) = rememberExportImportHandlers(context, cards, onImport)
     val coroutineScope = rememberCoroutineScope()
     var autoSave by remember {
         mutableStateOf(StorageManager.loadAutoSaveEnabled(context))
@@ -82,23 +85,19 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Button(
-            onClick = {
-                // TODO: implementovať backup/export
-            },
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Zálohovať karty")
+            OutlinedButton(onClick = export, modifier = Modifier.weight(1f)) {
+                Text("Export")
+            }
+            OutlinedButton(onClick = import, modifier = Modifier.weight(1f)) {
+                Text("Import")
+            }
         }
 
-        OutlinedButton(
-            onClick = {
-                // TODO: implementovať reset
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Obnoviť predvolené")
-        }
+        Spacer(modifier = Modifier.weight(1f))
 
         OutlinedButton(
             onClick = { showConfirm = true },
