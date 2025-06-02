@@ -17,7 +17,6 @@ import com.example.mojekarty.util.rememberExportImportHandlers
 fun SettingsScreen(
     context: Context,
     cards: List<Card>,
-    autoSave: Boolean,
     onAutoSaveChange: (Boolean) -> Unit,
     onClearAll: () -> Unit,
     navController: NavController,
@@ -62,7 +61,7 @@ fun SettingsScreen(
         if (!localAutoSave) {
             Button(
                 onClick = {
-                    StorageManager.saveCards(context, cards)
+                    StorageManager.saveCardsToFile(context, cards)
                     navController.navigate("cards") {
                         popUpTo("settings") { inclusive = true }
                     }
@@ -75,14 +74,11 @@ fun SettingsScreen(
                 Text("Uložiť zmeny")
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             HorizontalDivider(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                 thickness = 1.dp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Row(
@@ -129,7 +125,7 @@ fun SettingsScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         onClearAll()
-                        StorageManager.saveCards(context, emptyList())
+                        StorageManager.saveCardsToFile(context, emptyList())
                         showConfirm = false
 
                         navController.navigate("cards") {

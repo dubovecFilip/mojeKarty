@@ -45,7 +45,7 @@ fun MainScreen(
 
     val cards = remember {
         mutableStateListOf<Card>().apply {
-            addAll(StorageManager.loadCards(context))
+            addAll(StorageManager.loadCardsFromFile(context))
         }
     }
 
@@ -144,7 +144,7 @@ fun MainScreen(
                     TextButton(onClick = {
                         cards.remove(card)
                         if (autoSaveEnabled) {
-                            StorageManager.saveCards(context, cards)
+                            StorageManager.saveCardsToFile(context, cards)
                         }
                         selectedCard = null
                     }) {
@@ -174,12 +174,11 @@ fun MainScreen(
                 SettingsScreen(
                     context = context,
                     cards = cards,
-                    autoSave = autoSaveEnabled,
                     onAutoSaveChange = {
                         autoSaveEnabled = it
                         StorageManager.saveAutoSaveEnabled(context, it)
                         if (it) {
-                            StorageManager.saveCards(context, cards)
+                            StorageManager.saveCardsToFile(context, cards)
                         }
                     },
                     onClearAll = { cards.clear() },
@@ -189,7 +188,7 @@ fun MainScreen(
                         cards.clear()
                         cards.addAll(importedCards)
                         if (autoSaveEnabled) {
-                            StorageManager.saveCards(context, cards)
+                            StorageManager.saveCardsToFile(context, cards)
                         }
                     }
                 )
@@ -200,7 +199,7 @@ fun MainScreen(
                     onSave = { newCard ->
                         cards.add(newCard)
                         if (autoSaveEnabled) {
-                            StorageManager.saveCards(context, cards)
+                            StorageManager.saveCardsToFile(context, cards)
                         }
                         navController.popBackStack()
                     },
@@ -216,7 +215,7 @@ fun MainScreen(
                     onSave = { updatedCard ->
                         val index = cards.indexOfFirst { it.id == updatedCard.id }
                         if (index != -1) cards[index] = updatedCard
-                        if (autoSaveEnabled) StorageManager.saveCards(context, cards)
+                        if (autoSaveEnabled) StorageManager.saveCardsToFile(context, cards)
                         editingCard = null
                         navController.popBackStack()
                     },
@@ -236,7 +235,7 @@ fun MainScreen(
                         val incremented = updatedCard.copy(usedCount = updatedCard.usedCount + 1)
                         cards[index] = incremented
                         if (autoSaveEnabled) {
-                            StorageManager.saveCards(context, cards)
+                            StorageManager.saveCardsToFile(context, cards)
                         }
                     }
                     PreviewCardScreen(card = cards[index], onBack = { navController.popBackStack() })
