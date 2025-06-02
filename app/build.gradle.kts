@@ -59,5 +59,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.gson)
     implementation(libs.colorpicker.compose)
+    implementation(libs.core)
 
 }

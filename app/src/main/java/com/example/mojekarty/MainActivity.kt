@@ -6,14 +6,30 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.*
 import com.example.mojekarty.ui.theme.MojeKartyTheme
 import com.example.mojekarty.ui.screens.MainScreen
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MojeKartyTheme {
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val route = navBackStackEntry?.destination?.route
+
+                LaunchedEffect(route) {
+                    requestedOrientation = when (route) {
+                        "cards", "settings" -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    }
+                }
+
                 Surface {
-                    MainScreen(context = this)
+                    MainScreen(context = this@MainActivity, navController = navController)
                 }
             }
         }

@@ -69,7 +69,7 @@ fun AddCardScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Text("Vyber farbu", style = MaterialTheme.typography.labelLarge)
+        Spacer(modifier = Modifier.weight(1f))
 
         HsvColorPicker(
             modifier = Modifier
@@ -87,6 +87,8 @@ fun AddCardScreen(
             }
         )
 
+        Spacer(modifier = Modifier.weight(1f))
+
         val hexColor = "#" + Integer.toHexString(selectedColor.toArgb()).takeLast(6)
         LoyaltyCardItem(
             card = Card(
@@ -97,8 +99,6 @@ fun AddCardScreen(
                 color = hexColor
             )
         )
-
-        Spacer(modifier = Modifier.weight(1f))
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),

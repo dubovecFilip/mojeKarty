@@ -4,12 +4,23 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
 import com.example.mojekarty.ui.components.LoyaltyCardItem
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.ui.unit.LayoutDirection
+
 
 @Composable
 fun CardListScreen(
@@ -17,23 +28,85 @@ fun CardListScreen(
     onCardClick: (Card) -> Unit = {},
     onCardLongClick: (Card) -> Unit = {}
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        items(cards) { card ->
-            LoyaltyCardItem(
-                card = card,
-                modifier = Modifier.pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { onCardClick(card) },
-                        onLongPress = { onCardLongClick(card) }
-                    )
-                },
-                onClick = { onCardClick(card) }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val horizontalPadding = if (isLandscape) {
+        WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr) + 32.dp
+    } else {
+        0.dp
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (cards.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Začni pridaním svojej prvej karty",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Klikni na + hore vpravo",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        } else {
+            if (isLandscape) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = horizontalPadding,
+                            end = horizontalPadding
+                        )
+                ) {
+                    items(cards) { card ->
+                        LoyaltyCardItem(
+                            card = card,
+                            modifier = Modifier
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { onCardClick(card) },
+                                        onLongPress = { onCardLongClick(card) }
+                                    )
+                                }
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(cards) { card ->
+                        LoyaltyCardItem(
+                            card = card,
+                            modifier = Modifier
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { onCardClick(card) },
+                                        onLongPress = { onCardLongClick(card) }
+                                    )
+                                }
+                        )
+                    }
+                }
+            }
         }
     }
 }

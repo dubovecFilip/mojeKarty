@@ -1,5 +1,6 @@
 package com.example.mojekarty.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,22 +13,23 @@ import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
 import androidx.core.graphics.toColorInt
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
+import com.example.mojekarty.util.generateBarcodeBitmap
 
 @Composable
 fun LoyaltyCardItem(
     card: Card,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    barcodeHeight: Dp = 80.dp,
+    height: Dp = 120.dp
 ) {
-    val backgroundColor = try {
-        Color(card.color.toColorInt())
-    } catch (e: Exception) {
-        MaterialTheme.colorScheme.primary
-    }
+    val backgroundColor = Color(card.color.toColorInt())
+
+    val barcode = generateBarcodeBitmap(card.cardNumber, width = 600, height = barcodeHeight.value.toInt())
 
     val cardModifier = modifier
         .fillMaxWidth()
-        .height(120.dp)
+        .height(height)
         .clip(RoundedCornerShape(16.dp))
 
     Card(
@@ -50,6 +52,11 @@ fun LoyaltyCardItem(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
+                /*Text(
+                    text = "${card.usedCount}x",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )*/
                 Text(
                     text = card.cardNumber,
                     style = MaterialTheme.typography.bodyLarge,
@@ -57,18 +64,34 @@ fun LoyaltyCardItem(
                 )
             }
 
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
+                    .height(barcodeHeight)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White)
+                    .padding(4.dp)
             ) {
-                Text(
-                    text = "TODO: čiarový kód",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                if (barcode != null) {
+                    Image(
+                        bitmap = barcode,
+                        contentDescription = "Čiarový kód",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(
+                        text = "Neplatný kód",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
