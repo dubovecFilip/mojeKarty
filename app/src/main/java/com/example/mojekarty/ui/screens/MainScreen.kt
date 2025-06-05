@@ -1,6 +1,7 @@
 package com.example.mojekarty.ui.screens
 
 import android.content.Context
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.R
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 
 
@@ -49,6 +51,12 @@ fun MainScreen(
         }
     }
 
+    fun saveIfAutoEnabled() {
+        if (autoSaveEnabled) {
+            StorageManager.saveCardsToFile(context, cards)
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
 
@@ -59,7 +67,7 @@ fun MainScreen(
 
                         Icon(
                             painter = painterResource(id = R.drawable.logo),
-                            contentDescription = "Logo",
+                            contentDescription = stringResource(R.string.str_logo),
                             modifier = Modifier
                                 .size(50.dp)
                                 .padding(end = 8.dp)
@@ -67,11 +75,10 @@ fun MainScreen(
 
                         Text(
                             when (currentDestination) {
-                                "settings" -> "Nastavenia"
-                                "add" -> "Pridať kartu"
-                                "edit" -> "Upraviť kartu"
-                                "stats" -> "Štatistiky kariet"
-                                else -> "mojeKarty"
+                                "settings" -> stringResource(R.string.str_settings)
+                                "add"-> stringResource(R.string.str_add_card)
+                                "edit" -> stringResource(R.string.str_edit_card)
+                                else -> stringResource(R.string.app_name)
                             }
                         )
 
@@ -85,7 +92,7 @@ fun MainScreen(
                 actions = {
                     if (currentDestination == "cards") {
                         IconButton(onClick = { navController.navigate("add") }) {
-                            Icon(Icons.Default.Add, contentDescription = "Pridať kartu")
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.str_add_card))
                         }
                     }
                 }
@@ -100,8 +107,8 @@ fun MainScreen(
                 NavigationBarItem(
                     selected = currentDestination == "cards",
                     onClick = { navController.navigate("cards") },
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Karty") },
-                    label = { Text("Karty") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = stringResource(R.string.str_cards)) },
+                    label = { Text(stringResource(R.string.str_cards)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -112,8 +119,8 @@ fun MainScreen(
                 NavigationBarItem(
                     selected = currentDestination == "settings",
                     onClick = { navController.navigate("settings") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Nastavenia") },
-                    label = { Text("Nastavenia") },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.str_settings)) },
+                    label = { Text(stringResource(R.string.str_settings)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -127,8 +134,8 @@ fun MainScreen(
         selectedCard?.let { card ->
             AlertDialog(
                 onDismissRequest = { selectedCard = null },
-                title = { Text("Akcie") },
-                text = { Text("Čo chceš spraviť s kartou ${card.companyName}?") },
+                title = { Text(stringResource(R.string.str_actions)) },
+                text = { Text(stringResource(R.string.str_card_menu) + " ${card.companyName}?") },
 
                 confirmButton = {
                     TextButton(onClick = {
@@ -136,19 +143,17 @@ fun MainScreen(
                         selectedCard = null
                         navController.navigate("edit")
                     }) {
-                        Text("Upraviť")
+                        Text(stringResource(R.string.str_edit))
                     }
                 },
 
                 dismissButton = {
                     TextButton(onClick = {
                         cards.remove(card)
-                        if (autoSaveEnabled) {
-                            StorageManager.saveCardsToFile(context, cards)
-                        }
+                        saveIfAutoEnabled()
                         selectedCard = null
                     }) {
-                        Text("Vymazať")
+                        Text(stringResource(R.string.str_delete))
                     }
                 }
             )
@@ -177,9 +182,7 @@ fun MainScreen(
                     onAutoSaveChange = {
                         autoSaveEnabled = it
                         StorageManager.saveAutoSaveEnabled(context, it)
-                        if (it) {
-                            StorageManager.saveCardsToFile(context, cards)
-                        }
+                        saveIfAutoEnabled()
                     },
                     onClearAll = { cards.clear() },
                     navController = navController,
@@ -187,9 +190,7 @@ fun MainScreen(
                     onImport = { importedCards ->
                         cards.clear()
                         cards.addAll(importedCards)
-                        if (autoSaveEnabled) {
-                            StorageManager.saveCardsToFile(context, cards)
-                        }
+                        saveIfAutoEnabled()
                     }
                 )
             }
@@ -198,9 +199,7 @@ fun MainScreen(
                 AddCardScreen(
                     onSave = { newCard ->
                         cards.add(newCard)
-                        if (autoSaveEnabled) {
-                            StorageManager.saveCardsToFile(context, cards)
-                        }
+                        saveIfAutoEnabled()
                         navController.popBackStack()
                     },
                     onCancel = {
@@ -215,7 +214,7 @@ fun MainScreen(
                     onSave = { updatedCard ->
                         val index = cards.indexOfFirst { it.id == updatedCard.id }
                         if (index != -1) cards[index] = updatedCard
-                        if (autoSaveEnabled) StorageManager.saveCardsToFile(context, cards)
+                        saveIfAutoEnabled()
                         editingCard = null
                         navController.popBackStack()
                     },
@@ -234,9 +233,7 @@ fun MainScreen(
                     LaunchedEffect(key1 = updatedCard.id) {
                         val incremented = updatedCard.copy(usedCount = updatedCard.usedCount + 1)
                         cards[index] = incremented
-                        if (autoSaveEnabled) {
-                            StorageManager.saveCardsToFile(context, cards)
-                        }
+                        saveIfAutoEnabled()
                     }
                     PreviewCardScreen(card = cards[index], onBack = { navController.popBackStack() })
                 }

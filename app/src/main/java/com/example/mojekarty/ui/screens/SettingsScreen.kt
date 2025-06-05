@@ -6,8 +6,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mojekarty.R
 import com.example.mojekarty.data.StorageManager
 import com.example.mojekarty.model.Card
 import kotlinx.coroutines.launch
@@ -26,11 +28,17 @@ fun SettingsScreen(
 ) {
     val (export, import) = rememberExportImportHandlers(context, cards, onImport)
     val coroutineScope = rememberCoroutineScope()
-    var autoSave by remember {
-        mutableStateOf(StorageManager.loadAutoSaveEnabled(context))
-    }
+
+    var localAutoSave by remember { mutableStateOf(StorageManager.loadAutoSaveEnabled(context)) }
+
     var showConfirm by remember { mutableStateOf(false) }
-    var localAutoSave by remember { mutableStateOf(autoSave) }
+
+    val changesSaved = stringResource(R.string.str_changes_saved)
+    val deleteConfirm = stringResource(R.string.str_delete_confirm)
+
+    fun saveCards(cards: List<Card>) {
+        StorageManager.saveCardsToFile(context, cards)
+    }
 
     Column(
         modifier = modifier
@@ -46,7 +54,7 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Automatické ukladanie",
+                text = stringResource(R.string.str_auto_save),
                 style = MaterialTheme.typography.bodyLarge
             )
             Switch(
@@ -61,17 +69,17 @@ fun SettingsScreen(
         if (!localAutoSave) {
             Button(
                 onClick = {
-                    StorageManager.saveCardsToFile(context, cards)
+                    saveCards(cards)
                     navController.navigate("cards") {
                         popUpTo("settings") { inclusive = true }
                     }
                     coroutineScope.launch {
-                        snackbarHostState.showSnackbar("Zmeny boli uložené")
+                        snackbarHostState.showSnackbar(changesSaved)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Uložiť zmeny")
+                Text(stringResource(R.string.str_save_changes))
             }
 
             HorizontalDivider(
@@ -86,10 +94,10 @@ fun SettingsScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedButton(onClick = export, modifier = Modifier.weight(1f)) {
-                Text("Export")
+                Text(stringResource(R.string.str_export))
             }
             OutlinedButton(onClick = import, modifier = Modifier.weight(1f)) {
-                Text("Import")
+                Text(stringResource(R.string.str_import))
             }
         }
 
@@ -102,7 +110,7 @@ fun SettingsScreen(
             onClick = { navController.navigate("stats") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Zobraziť štatistiky")
+            Text(stringResource(R.string.str_show_stats))
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -114,18 +122,18 @@ fun SettingsScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Vymazať všetky karty")
+            Text(stringResource(R.string.str_delete_cards))
         }
 
         if (showConfirm) {
             AlertDialog(
                 onDismissRequest = { showConfirm = false },
-                title = { Text("Naozaj vymazať?") },
-                text = { Text("Týmto odstrániš všetky uložené karty.") },
+                title = { Text(stringResource(R.string.str_confirm_delete)) },
+                text = { Text(stringResource(R.string.str_confirm_delete_desc)) },
                 confirmButton = {
                     TextButton(onClick = {
                         onClearAll()
-                        StorageManager.saveCardsToFile(context, emptyList())
+                        saveCards(emptyList())
                         showConfirm = false
 
                         navController.navigate("cards") {
@@ -133,15 +141,15 @@ fun SettingsScreen(
                         }
 
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar("Všetky karty boli vymazané")
+                            snackbarHostState.showSnackbar(deleteConfirm)
                         }
                     }) {
-                        Text("Vymazať")
+                        Text(stringResource(R.string.str_delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showConfirm = false }) {
-                        Text("Zrušiť")
+                        Text(stringResource(R.string.str_cancel))
                     }
                 }
             )

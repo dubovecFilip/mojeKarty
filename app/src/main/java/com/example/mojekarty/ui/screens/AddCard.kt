@@ -9,10 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
 import com.github.skydoves.colorpicker.compose.*
 import androidx.core.graphics.toColorInt
+import com.example.mojekarty.R
 import com.example.mojekarty.ui.components.LoyaltyCardItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,28 +46,28 @@ fun AddCardScreen(
         OutlinedTextField(
             value = company,
             onValueChange = { company = it },
-            label = { Text("Spoločnosť") },
+            label = { Text(stringResource(R.string.str_company)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
             value = number,
             onValueChange = { number = it },
-            label = { Text("Číslo karty") },
+            label = { Text(stringResource(R.string.str_card_number)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
                     // TODO: skenovanie kódu
                 }) {
-                    Icon(Icons.Default.Search, contentDescription = "Skenovať")
+                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.str_scan))
                 }
             }
         )
         OutlinedTextField(
             value = holder,
             onValueChange = { holder = it },
-            label = { Text("Meno držiteľa") },
+            label = { Text(stringResource(R.string.str_name_of_holder)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -77,6 +79,7 @@ fun AddCardScreen(
                 .fillMaxWidth()
                 .height(200.dp),
             controller = colorController,
+            initialColor = selectedColor,
             onColorChanged = { colorEnvelope ->
                 val color = colorEnvelope.color
                 if (color.luminance() < 0.80f) {
@@ -90,16 +93,17 @@ fun AddCardScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val hexColor = "#" + Integer.toHexString(selectedColor.toArgb()).takeLast(6)
-        LoyaltyCardItem(
-            card = Card(
-                id = 0,
-                companyName = if (company.isNotBlank()) company else "Spoločnosť",
-                cardNumber = if (number.isNotBlank()) number else "1234567890",
-                holderName = holder,
-                color = hexColor
-            )
+        val hexColor = String.format("#%06X", 0xFFFFFF and selectedColor.toArgb())
+
+        val previewCard = Card(
+            id = initialCard?.id ?: 0,
+            companyName = if (company.isNotBlank()) company else stringResource(R.string.str_company),
+            cardNumber = if (number.isNotBlank()) number else stringResource(R.string.str_dummy_number),
+            holderName = holder,
+            color = hexColor
         )
+
+        LoyaltyCardItem(card = previewCard)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -109,25 +113,21 @@ fun AddCardScreen(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Zrušiť")
+                Text(stringResource(R.string.str_cancel))
             }
             Button(
                 onClick = {
-                    val newCard = Card(
-                        id = initialCard?.id ?: (0..999999).random(),
-                        companyName = company,
-                        cardNumber = number,
-                        holderName = holder.ifBlank { null },
-                        color = hexColor,
+                    val savedCard = previewCard.copy(
+                        id = initialCard?.id ?: (0..999_999).random(),
                         usedCount = initialCard?.usedCount ?: 0,
                         createdAt = initialCard?.createdAt ?: System.currentTimeMillis()
                     )
-                    onSave(newCard)
+                    onSave(savedCard)
                 },
                 modifier = Modifier.weight(1f),
                 enabled = company.isNotBlank() && number.isNotBlank()
             ) {
-                Text("Pridať")
+                Text(stringResource(R.string.str_add))
             }
         }
     }

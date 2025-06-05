@@ -1,8 +1,6 @@
 package com.example.mojekarty.ui.screens
 
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,7 +17,9 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
+import com.example.mojekarty.R
 
 
 @Composable
@@ -31,6 +31,7 @@ fun CardListScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    val columnCount = if (isLandscape) 2 else 1
     val horizontalPadding = if (isLandscape) {
         WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr) + 32.dp
     } else {
@@ -47,64 +48,39 @@ fun CardListScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Začni pridaním svojej prvej karty",
+                    text = stringResource(R.string.str_start_first),
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Klikni na + hore vpravo",
+                    text = stringResource(R.string.str_start_first_desc),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
         } else {
-            if (isLandscape) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = horizontalPadding,
-                            end = horizontalPadding
-                        )
-                ) {
-                    items(cards) { card ->
-                        LoyaltyCardItem(
-                            card = card,
-                            modifier = Modifier
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onTap = { onCardClick(card) },
-                                        onLongPress = { onCardLongClick(card) }
-                                    )
-                                }
-                        )
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(cards) { card ->
-                        LoyaltyCardItem(
-                            card = card,
-                            modifier = Modifier
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onTap = { onCardClick(card) },
-                                        onLongPress = { onCardLongClick(card) }
-                                    )
-                                }
-                        )
-                    }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnCount),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = horizontalPadding)
+            ) {
+                items(cards) { card ->
+                    LoyaltyCardItem(
+                        card = card,
+                        modifier = Modifier
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onTap = { onCardClick(card) },
+                                    onLongPress = { onCardLongClick(card) }
+                                )
+                            }
+                    )
                 }
             }
         }

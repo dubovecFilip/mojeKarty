@@ -2,18 +2,17 @@ package com.example.mojekarty.data
 
 import android.content.Context
 import com.example.mojekarty.model.Card
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import androidx.core.content.edit
-import com.google.gson.GsonBuilder
 
+/**
+ * Naučené z: https://developer.android.com/reference/android/content/SharedPreferences
+ * Autor: Android Developers
+ */
 object StorageManager {
 
-    private const val PREF_NAME = "moje_karty_prefs"
-    private const val FILE_NAME = "cards.json"
+    private const val PREF_NAME = "cards_prefs"
     private const val KEY_AUTO_SAVE = "auto_save_enabled"
-
-    private val gson = Gson()
+    private const val FILE_NAME = "cards.json"
 
     fun saveAutoSaveEnabled(context: Context, enabled: Boolean) {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -26,7 +25,7 @@ object StorageManager {
     }
 
     fun saveCardsToFile(context: Context, cards: List<Card>) {
-        val json = GsonBuilder().setPrettyPrinting().create().toJson(cards)
+        val json = CardSerializer.serialize(cards)
         context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use {
             it.write(json.toByteArray())
         }
@@ -34,12 +33,8 @@ object StorageManager {
 
     fun loadCardsFromFile(context: Context): MutableList<Card> {
         return try {
-            val file = context.getFileStreamPath(FILE_NAME)
-            if (!file.exists()) return mutableListOf()
-
-            val json = file.readText()
-            val type = object : TypeToken<MutableList<Card>>() {}.type
-            gson.fromJson(json, type)
+            val json = context.openFileInput(FILE_NAME).bufferedReader().use { it.readText() }
+            CardSerializer.deserialize(json)
         } catch (e: Exception) {
             mutableListOf()
         }

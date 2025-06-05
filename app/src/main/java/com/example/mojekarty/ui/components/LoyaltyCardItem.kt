@@ -6,14 +6,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
 import androidx.core.graphics.toColorInt
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import com.example.mojekarty.R
 import com.example.mojekarty.util.generateBarcodeBitmap
 
 @Composable
@@ -25,7 +27,9 @@ fun LoyaltyCardItem(
 ) {
     val backgroundColor = Color(card.color.toColorInt())
 
-    val barcode = generateBarcodeBitmap(card.cardNumber, width = 600, height = barcodeHeight.value.toInt())
+    val barcode = remember(card.cardNumber, barcodeHeight) {
+        generateBarcodeBitmap(card.cardNumber, width = 600, height = barcodeHeight.value.toInt())
+    }
 
     val cardModifier = modifier
         .fillMaxWidth()
@@ -52,11 +56,6 @@ fun LoyaltyCardItem(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
-                /*Text(
-                    text = "${card.usedCount}x",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )*/
                 Text(
                     text = card.cardNumber,
                     style = MaterialTheme.typography.bodyLarge,
@@ -78,20 +77,11 @@ fun LoyaltyCardItem(
                     .background(Color.White)
                     .padding(4.dp)
             ) {
-                if (barcode != null) {
-                    Image(
-                        bitmap = barcode,
-                        contentDescription = "Čiarový kód",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Text(
-                        text = "Neplatný kód",
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+                Image(
+                    bitmap = barcode,
+                    contentDescription = stringResource(R.string.str_barcode),
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

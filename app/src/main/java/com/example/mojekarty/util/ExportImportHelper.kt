@@ -4,11 +4,19 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.example.mojekarty.R
 import com.example.mojekarty.model.Card
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.OutputStreamWriter
 
+
+/**
+ * Inšpirované z: https://blog.jroddev.com/reading-and-writing-files-in-android-10/
+ * Autor: jroddev
+ * Prispôsobené pre použitie v aplikácii mojeKarty
+ */
 @Composable
 fun rememberExportImportHandlers(
     context: Context,
@@ -16,6 +24,8 @@ fun rememberExportImportHandlers(
     onImport: (List<Card>) -> Unit
 ): Pair<() -> Unit, () -> Unit> {
     val gson = Gson()
+
+    val exportFileName = stringResource(R.string.str_export_file_name)
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -45,7 +55,7 @@ fun rememberExportImportHandlers(
     )
 
     return Pair(
-        { exportLauncher.launch("karty_export.json") },
+        { exportLauncher.launch(exportFileName) },
         { importLauncher.launch(arrayOf("application/json")) }
     )
 }

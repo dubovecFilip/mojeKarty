@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">mojeKarty</string>
+    <string name="str_settings">Nastavenia</string>
+    <string name="str_add_card">Pridať kartu</string>
+    <string name="str_edit_card">Upraviť kartu</string>
+    <string name="str_card_stats">Štatistiky kariet</string>
+    <string name="str_cards">Karty</string>
+    <string name="str_logo">Logo</string>
+    <string name="str_edit">Upraviť</string>
+    <string name="str_actions">Akcie</string>
+    <string name="str_card_menu">Čo chceš spraviť s kartou</string>
+    <string name="str_barcode">Čiarový kód</string>
+    <string name="str_invalid_code">Neplatný kód</string>
+    <string name="str_cancel">Zrušiť</string>
+    <string name="str_company">Spoločnosť</string>
+    <string name="str_dummy_number">1234567890</string>
+    <string name="str_add">Pridať</string>
+    <string name="str_stats_empty">Štatistiky o pridaných\nkartách sa zobrazia tu.</string>
+    <string name="str_created">Vytvorená</string>
+    <string name="str_auto_save">Automatické ukladanie</string>
+    <string name="str_changes_saved">Zmeny boli uložené</string>
+    <string name="str_save_changes">Uložiť zmeny</string>
+    <string name="str_export">Export</string>
+    <string name="str_import">Import</string>
+    <string name="str_show_stats">Zobraziť štatistiky</string>
+    <string name="str_delete_cards">Vymazať všetky karty</string>
+    <string name="str_confirm_delete">Naozaj vymazať?</string>
+    <string name="str_confirm_delete_desc">Týmto odstrániš všetky uložené karty.</string>
+    <string name="str_delete_confirm">Všetky karty boli vymazané</string>
+    <string name="str_delete">Vymazať</string>
+    <string name="str_card_number">Číslo karty</string>
+    <string name="str_scan">Skenovať</string>
+    <string name="str_name_of_holder">Meno držiteľa</string>
+    <string name="str_start_first">Začni pridaním svojej prvej karty</string>
+    <string name="str_start_first_desc">Klikni na + hore vpravo</string>
+    <string name="str_export_file_name">karty_export.json</string>
 </resources>

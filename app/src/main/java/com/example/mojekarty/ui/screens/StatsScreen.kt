@@ -11,7 +11,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.example.mojekarty.R
 
 @Composable
 fun StatsScreen(
@@ -30,7 +32,7 @@ fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Štatistiky o pridaných\nkartách sa zobrazia tu.",
+                text = stringResource(R.string.str_stats_empty),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )
@@ -55,11 +57,11 @@ fun StatsScreen(
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                             )
                             Text(
-                                text = "Vytvorená: ${formatDate(card.createdAt)}",
+                                text = stringResource(R.string.str_created) + ": ${formatDate(card.createdAt)}",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
-                        Text("$count×", style = MaterialTheme.typography.bodyLarge)
+                        Text("$count x", style = MaterialTheme.typography.bodyLarge)
                     }
                     HorizontalDivider()
                 }
