@@ -18,6 +18,16 @@ import androidx.compose.ui.unit.Dp
 import com.example.mojekarty.R
 import com.example.mojekarty.util.generateBarcodeBitmap
 
+/**
+ * Komponent pre zobrazenie jednej vernostnej karty v zozname.
+ *
+ * Zobrazuje názov spolocnosti, číslo karty, vlastníka a farbu.
+ *
+ * @param card Dátová trieda reprezentujúca kartu, ktorú chceme zobraziť
+ * @param modifier Modifikátory pre prispôsobenie vzhľadu komponentu
+ * @param barcodeHeight Výška čiarového kódu
+ * @param height Celková výška komponentu
+ */
 @Composable
 fun LoyaltyCardItem(
     card: Card,
@@ -27,6 +37,7 @@ fun LoyaltyCardItem(
 ) {
     val backgroundColor = Color(card.color.toColorInt())
 
+    // Zapamätanie si vygenerovaného bitmapu čiarového kódu pre danú kartu a výšku.
     val barcode = remember(card.cardNumber, barcodeHeight) {
         generateBarcodeBitmap(card.cardNumber, width = 600, height = barcodeHeight.value.toInt())
     }
@@ -69,6 +80,7 @@ fun LoyaltyCardItem(
                     .height(6.dp)
             )
 
+            // Zobrazenie čiarového kódu vo vnútri bieleho zaobleného rámika.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

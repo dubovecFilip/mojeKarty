@@ -12,6 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
+/**
+ * Hlavná aktivita aplikácie mojeKarty.
+ *
+ * Inicializuje Compose prostredie a nastavuje tému a navigáciu.
+ * Dynamicky riadi orientáciu obrazovky porľa aktuálnej obrazovky (route):
+ *  - cards, settings -> umožnená automatická orientácia
+ *  - ostatné -> zamknuté na portrait.
+ */
+@ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +32,7 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(route) {
                     requestedOrientation = when (route) {
-                        "cards", "settings" -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        "cards", "settings", "preview/{cardId}" -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                         else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     }
                 }

@@ -14,14 +14,20 @@ import com.example.mojekarty.ui.components.LoyaltyCardItem
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import com.example.mojekarty.R
 
-
+/**
+ * Obrazovka so zoznamom uložených kariet.
+ *
+ * Ak je zoznam prázdny, zobrazí sa informácia pre používateľa.
+ * Ak sú karty dostupném zobrazia sa v mriežke (1 stĺpec v portrait,
+ * 2 stĺpce v landscape móde).
+ *
+ * @param cards Zoznam kariet na zobrazenie
+ * @param onCardClick Callback pri kliknutí na kartu
+ * @param onCardLongClick Callback pri dlhom stlačení karty
+ */
 @Composable
 fun CardListScreen(
     cards: List<Card>,
@@ -29,17 +35,20 @@ fun CardListScreen(
     onCardLongClick: (Card) -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
+    // Určenie, či je zatiadenie v landscape režime.
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
+    // Počet stĺpcov v LazyVerticalGrid v závislosti od orientácie.
     val columnCount = if (isLandscape) 2 else 1
+    // V landscape móde pridávame horizonálny padding (camera notch).
     val horizontalPadding = if (isLandscape) {
-        WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(LayoutDirection.Ltr) + 32.dp
+        32.dp
     } else {
         0.dp
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (cards.isEmpty()) {
+            // Empty state - žiadne karty nie sú uložené.
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -61,6 +70,7 @@ fun CardListScreen(
                 )
             }
         } else {
+            // LazyVerticalGrid - dynamický zoznam kariet.
             LazyVerticalGrid(
                 columns = GridCells.Fixed(columnCount),
                 contentPadding = PaddingValues(16.dp),
@@ -71,6 +81,8 @@ fun CardListScreen(
                     .padding(horizontal = horizontalPadding)
             ) {
                 items(cards) { card ->
+                    // Obalenie karty pointerInput modifierom,
+                    // aby sme mohli reagovať na kliknutie a podržanie.
                     LoyaltyCardItem(
                         card = card,
                         modifier = Modifier

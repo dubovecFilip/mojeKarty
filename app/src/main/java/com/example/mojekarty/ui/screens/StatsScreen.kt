@@ -15,12 +15,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.mojekarty.R
 
+/**
+ * Obrazovka so štatistikami používania kariet.
+ *
+ * Zobrazuje zoznam kariet usporiadaný podľa počtu použití (stlačení),
+ * spolu s dátumom vytvorenia a samotným počtom.
+ *
+ * @param cards Zoznam kariet
+ * @param clickCounts Mapovanie id karty na počet použití
+ * @param modifier Modifier pre rozloženie obrazovky (voliteľný)
+ */
 @Composable
 fun StatsScreen(
     cards: List<Card>,
     clickCounts: Map<Int, Int>,
     modifier: Modifier = Modifier
 ) {
+    // Karty sú usporiadané podľa počtu použití, aby boli najpoužívanejšie hore.
     val sortedCards = cards.sortedByDescending { clickCounts[it.id] ?: 0 }
 
     if (sortedCards.isEmpty()) {
@@ -70,6 +81,14 @@ fun StatsScreen(
     }
 }
 
+/**
+ * Formátuje timestamp (čas vytvorenia karty) na čitateľný slovenský dátum.
+ *
+ * Používa Locate("sk"), aby sa dátum zobrazoval v slovenskom formáte ("5. jún 2025")
+ *
+ * @param timestamp Timestamp (čas vytvorenia karty) v milisekundách
+ * @return Formátovaný dátum ako String
+ */
 fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("d. MMMM yyyy", Locale("sk"))
     return sdf.format(Date(timestamp))

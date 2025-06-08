@@ -34,4 +34,8 @@
     <string name="str_start_first">Začni pridaním svojej prvej karty</string>
     <string name="str_start_first_desc">Klikni na + hore vpravo</string>
     <string name="str_export_file_name">karty_export.json</string>
+    <string name="str_scan_prompt">Naskenuj čiarový kód</string>
+    <string name="prefs_name">cards_prefs</string>
+    <string name="auto_save_enabled">auto_save_enabled</string>
+    <string name="file_name_sp">cards.json</string>
 </resources>

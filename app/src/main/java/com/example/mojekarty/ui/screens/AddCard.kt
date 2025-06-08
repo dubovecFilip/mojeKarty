@@ -1,5 +1,6 @@
 package com.example.mojekarty.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -9,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.model.Card
@@ -16,8 +18,19 @@ import com.github.skydoves.colorpicker.compose.*
 import androidx.core.graphics.toColorInt
 import com.example.mojekarty.R
 import com.example.mojekarty.ui.components.LoyaltyCardItem
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Obrazovka pre pridanie alebo úpravu vernostnej karty.
+ *
+ * Umožňuje zadať údaje o karte, naskenovať čiarovýkód cez kameru,
+ * vybrať farbu a zobraziť náhľad karty.
+ *
+ * @param onSave Callback, ktorý sa zavolá po potvrdení a uloźení karty
+ * @param onCancel Callback, ktorý sa zavolá pri zrušení pridania/úpravy karty
+ * @param initialCard Pôvodná karta (ak ide o úpravu), inak null (pridanie novej)
+ */
 @Composable
 fun AddCardScreen(
     onSave: (Card) -> Unit,
@@ -28,14 +41,24 @@ fun AddCardScreen(
     var number by remember { mutableStateOf(initialCard?.cardNumber ?: "") }
     var holder by remember { mutableStateOf(initialCard?.holderName ?: "") }
 
+    // Controller pre ColorPicker - uchováva aktuálne vybranú farbu.
     val colorController = rememberColorPickerController()
     var selectedColor by remember {
         mutableStateOf(
             initialCard?.color?.let { Color(it.toColorInt()) }
-                ?: Color(0xFF2196F3)
+                ?: Color(0xFF1E88D9)
         )
     }
+    // Posledná platná farba s dostatočným kontrastom.
     var lastValidColor by remember { mutableStateOf(selectedColor) }
+    val context = LocalContext.current
+
+    // Launcher pre spustenie skenovania čiarového kódu cez ZXing.
+    val launcher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
+        if (result.contents != null) {
+            number = result.contents
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -58,7 +81,10 @@ fun AddCardScreen(
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    // TODO: skenovanie kódu
+                    val options = ScanOptions().apply {
+                        setPrompt(context.getString(R.string.str_scan_prompt))
+                    }
+                    launcher.launch(options)
                 }) {
                     Icon(Icons.Default.Search, contentDescription = stringResource(R.string.str_scan))
                 }
@@ -77,9 +103,10 @@ fun AddCardScreen(
         HsvColorPicker(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(150.dp),
             controller = colorController,
             initialColor = selectedColor,
+            // Obmedzenie výberu príliž svetlých farieb (čitateľnosť textu).
             onColorChanged = { colorEnvelope ->
                 val color = colorEnvelope.color
                 if (color.luminance() < 0.80f) {

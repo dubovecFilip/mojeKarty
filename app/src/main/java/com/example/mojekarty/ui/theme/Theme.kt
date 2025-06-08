@@ -17,6 +17,15 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.example.mojekarty.R
 
+/**
+ * Globálna téma aplikácie mojeKarty.
+ *
+ * Nastavuje farebnú schému, typografiu a vzhľad status baru
+ * podľa zvolenej svetlej/tmavej témy.
+ *
+ * @param useDarkTheme Zvolená téma (tmavá/svetlá)
+ * @param content Obsah aplikácie, ktorý bude obalený témou
+ */
 @Composable
 fun MojeKartyTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
@@ -24,7 +33,7 @@ fun MojeKartyTheme(
 ) {
     val colorScheme = if (useDarkTheme) DarkColorScheme else LightColorScheme
 
-    // prvky na lište do správnej farby
+    // Nastavenie správnej farby prvkov v status bare podľa témy.
     val view = LocalView.current
     val context = LocalContext.current
     if (!view.isInEditMode) {
@@ -34,24 +43,26 @@ fun MojeKartyTheme(
         }
     }
 
-    val MontserratFontFamily = FontFamily(
+    // Definícia vlastného písma Montserrat pre celú aplikáciu.
+    val montserratFontFamily = FontFamily(
         Font(R.font.montserrat_regular, FontWeight.Normal),
         Font(R.font.montserrat_bold, FontWeight.Bold)
     )
 
-    val AppTypography = Typography(
+    // Vlastná typografia aplikácie - jednotný vzhľad textov.
+    val appTypography = Typography(
         bodyLarge = TextStyle(
-            fontFamily = MontserratFontFamily,
+            fontFamily = montserratFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = MontserratFontFamily,
+            fontFamily = montserratFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp
         ),
         labelLarge = TextStyle(
-            fontFamily = MontserratFontFamily,
+            fontFamily = montserratFontFamily,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp
         )
@@ -59,7 +70,7 @@ fun MojeKartyTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
+        typography = appTypography,
         shapes = Shapes(),
         content = content
     )

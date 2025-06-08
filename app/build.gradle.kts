@@ -65,5 +65,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.colorpicker.compose)
     implementation(libs.core)
+    implementation(libs.zxing.android.embedded)
 
 }

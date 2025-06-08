@@ -1,7 +1,6 @@
 package com.example.mojekarty.ui.screens
 
 import android.content.Context
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,7 +10,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,11 +25,25 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.unit.dp
 import com.example.mojekarty.R
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.mojekarty.ui.viewmodel.CardListViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Hlavná obrazovka aplikácie.
+ *
+ * Obsahuje navigačný scaffold, top bar, bottom navigation
+ * a NavHost pre prepínanie obrazoviek.
+ *
+ * Riadi zobrazovanie zoznamu kariet, pridávanie, editovanie,
+ * náhľad karty, nastavenia a štatistiky.
+ *
+ * @param context Kontext aplikácie (potrebný na prístup k StorageManager)
+ * @param navController Navigačný controller pre prepínanie obrazoviek
+ */
+@ExperimentalMaterial3Api
 @Composable
 fun MainScreen(
     context: Context,
@@ -40,18 +52,24 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
 
+    // Vybraná karta (pri long-press) - pre zobrazenie AlertDialogu.
     var selectedCard by remember { mutableStateOf<Card?>(null) }
+
+    // Nastavenie automatického ukladania - načíta sa pri spustení.
     var autoSaveEnabled by remember { mutableStateOf(StorageManager.loadAutoSaveEnabled(context)) }
+
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Karta, ktorú používateľ práve edituje (pri kliknutí na "Upraviť").
     var editingCard by remember { mutableStateOf<Card?>(null) }
 
-    val cards = remember {
-        mutableStateListOf<Card>().apply {
-            addAll(StorageManager.loadCardsFromFile(context))
-        }
-    }
+    val cardListViewModel: CardListViewModel = viewModel()
+    val cardsState = cardListViewModel.cards.collectAsState().value
 
-    fun saveIfAutoEnabled() {
+    /**
+     * Uloží karty do súboru ak je povolené automatické ukladanie.
+     */
+    fun saveIfAutoEnabled(cards: List<Card>) {
         if (autoSaveEnabled) {
             StorageManager.saveCardsToFile(context, cards)
         }
@@ -84,10 +102,6 @@ fun MainScreen(
 
                     }
                 },
-
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
 
                 actions = {
                     if (currentDestination == "cards") {
@@ -132,6 +146,8 @@ fun MainScreen(
         }
     ) { innerPadding ->
         selectedCard?.let { card ->
+
+            // AlertDialog - zobrazuje sa po long-press sna kartu.
             AlertDialog(
                 onDismissRequest = { selectedCard = null },
                 title = { Text(stringResource(R.string.str_actions)) },
@@ -149,8 +165,8 @@ fun MainScreen(
 
                 dismissButton = {
                     TextButton(onClick = {
-                        cards.remove(card)
-                        saveIfAutoEnabled()
+                        cardListViewModel.removeCard(card)
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
                         selectedCard = null
                     }) {
                         Text(stringResource(R.string.str_delete))
@@ -167,7 +183,7 @@ fun MainScreen(
 
             composable("cards") {
                 CardListScreen(
-                    cards = cards,
+                    cards = cardsState,
                     onCardClick = {
                         navController.navigate("preview/${it.id}")
                     },
@@ -178,28 +194,32 @@ fun MainScreen(
             composable("settings") {
                 SettingsScreen(
                     context = context,
-                    cards = cards,
+                    cards = cardsState,
+                    autoSaveEnabled = autoSaveEnabled,
                     onAutoSaveChange = {
                         autoSaveEnabled = it
+                        cardListViewModel.autoSaveEnabled = it
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
                         StorageManager.saveAutoSaveEnabled(context, it)
-                        saveIfAutoEnabled()
                     },
-                    onClearAll = { cards.clear() },
+                    onClearAll = {
+                        cardsState.forEach { cardListViewModel.removeCard(it) }
+                    },
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     onImport = { importedCards ->
-                        cards.clear()
-                        cards.addAll(importedCards)
-                        saveIfAutoEnabled()
-                    }
+                        importedCards.forEach { cardListViewModel.addCard(it) }
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
+                    },
+                    cardListViewModel = cardListViewModel
                 )
             }
 
             composable("add") {
                 AddCardScreen(
                     onSave = { newCard ->
-                        cards.add(newCard)
-                        saveIfAutoEnabled()
+                        cardListViewModel.addCard(newCard)
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
                         navController.popBackStack()
                     },
                     onCancel = {
@@ -212,9 +232,8 @@ fun MainScreen(
                 AddCardScreen(
                     initialCard = editingCard,
                     onSave = { updatedCard ->
-                        val index = cards.indexOfFirst { it.id == updatedCard.id }
-                        if (index != -1) cards[index] = updatedCard
-                        saveIfAutoEnabled()
+                        cardListViewModel.updateCard(updatedCard)
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
                         editingCard = null
                         navController.popBackStack()
                     },
@@ -227,20 +246,20 @@ fun MainScreen(
 
             composable("preview/{cardId}") { backStackEntry ->
                 val cardId = backStackEntry.arguments?.getString("cardId")?.toIntOrNull()
-                val index = cards.indexOfFirst { it.id == cardId }
-                if (index != -1) {
-                    val updatedCard = cards[index]
-                    LaunchedEffect(key1 = updatedCard.id) {
-                        val incremented = updatedCard.copy(usedCount = updatedCard.usedCount + 1)
-                        cards[index] = incremented
-                        saveIfAutoEnabled()
+                val card = cardsState.find { it.id == cardId }
+                if (card != null) {
+                    // LaunchedEffect - inkrementuje počet použití karty po jej zobrazení
+                    LaunchedEffect(key1 = card.id) {
+                        val incremented = card.copy(usedCount = card.usedCount + 1)
+                        cardListViewModel.updateCard(incremented)
+                        saveIfAutoEnabled(cardListViewModel.cards.value)
                     }
-                    PreviewCardScreen(card = cards[index], onBack = { navController.popBackStack() })
+                    PreviewCardScreen(card = card, onBack = { navController.popBackStack() })
                 }
             }
 
             composable("stats") {
-                StatsScreen(cards = cards, clickCounts = cards.associate { it.id to it.usedCount })
+                StatsScreen(cards = cardsState, clickCounts = cardsState.associate { it.id to it.usedCount })
             }
 
         }
