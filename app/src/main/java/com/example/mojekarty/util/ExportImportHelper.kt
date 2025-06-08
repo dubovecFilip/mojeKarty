@@ -6,9 +6,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.mojekarty.R
+import com.example.mojekarty.data.CardSerializer
 import com.example.mojekarty.model.Card
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.io.OutputStreamWriter
 
 
@@ -36,7 +35,6 @@ fun rememberExportImportHandlers(
     cards: List<Card>,
     onImport: (List<Card>) -> Unit
 ): Pair<() -> Unit, () -> Unit> {
-    val gson = Gson()
 
     val exportFileName = stringResource(R.string.str_export_file_name)
 
@@ -48,7 +46,7 @@ fun rememberExportImportHandlers(
                 // Po výbere cesty pre uloženie súboru zapíšeme JSON do OutputStream.
                 context.contentResolver.openOutputStream(it)?.use { outputStream ->
                     val writer = OutputStreamWriter(outputStream)
-                    writer.write(gson.toJson(cards)) // Serializácia zoznamu kariet na JSON.
+                    writer.write(CardSerializer.serialize(cards)) // Serializácia zoznamu kariet na JSON.
                     writer.flush()
                 }
             }
@@ -63,8 +61,7 @@ fun rememberExportImportHandlers(
                 // Po výbere súboru prečítame jeho obsah a deserializujeme JSON na List<Card>.
                 context.contentResolver.openInputStream(it)?.use { inputStream ->
                     val json = inputStream.bufferedReader().readText()
-                    val type = object : TypeToken<List<Card>>() {}.type
-                    val importedCards: List<Card> = gson.fromJson(json, type)
+                    val importedCards = CardSerializer.deserialize(json)
                     // Callback na uloženie alebo spracovanie importovaných kariet.
                     onImport(importedCards)
                 }
