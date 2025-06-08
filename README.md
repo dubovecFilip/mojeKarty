@@ -18,7 +18,7 @@ Dáta sa ukladajú offline vo formáte JSON.
 - Úprava existujúcej karty
 - Odstránenie karty
 - Náhľad karty na celú obrazovku (s čiarovým kódom)
-- ⚙Nastavenia aplikácie:
+- Nastavenia aplikácie:
   - automatické/manuálne ukladanie
   - export/import kariet (JSON súbor)
   - vymazanie všetkých kariet
@@ -27,7 +27,7 @@ Dáta sa ukladajú offline vo formáte JSON.
 
 ---
 
-## 🛠️ Použité technológie a knižnice
+##  Použité technológie a knižnice
 
 - **[Kotlin](https://kotlinlang.org/)**  
 - **[Jetpack Compose](https://developer.android.com/jetpack/compose)** (Material3)
@@ -56,5 +56,5 @@ Dáta sa ukladajú offline vo formáte JSON.
 
 ### Povolenia
 
-- 📷 Fotoaparát (pre skenovanie čiarových kódov)
-- 📁 Prístup k súborom (pre export/import kariet)
+- Fotoaparát (pre skenovanie čiarových kódov)
+- Prístup k súborom (pre export/import kariet)
